@@ -5,7 +5,7 @@
 typedef struct Estudiante {
     char *nombre;
     char *apellido;
-    unsigned int edad : 7;  // Uso de bitfield para optimizar el almacenamiento de edad
+    unsigned int edad : 7; 
     char *id;
     int *calificaciones;
     int num_calificaciones;
