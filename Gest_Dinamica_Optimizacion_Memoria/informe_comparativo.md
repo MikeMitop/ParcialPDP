@@ -1,35 +1,34 @@
 # Informe Comparativo de Desempeño de Memoria
 
 ## Introducción
-En este informe se compara el desempeño del programa antes y después de aplicar optimizaciones en la gestión de memoria. Se busca evaluar el impacto de las mejoras en términos de uso de memoria, fragmentación y tiempo de ejecución.
+En este informe se presentan los resultados de la optimización de memoria en la gestión de registros de estudiantes. Se comparan los valores obtenidos antes y después de aplicar técnicas de optimización, como el uso eficiente de memoria dinámica y la reducción de fragmentación.
 
-## Análisis Antes de Optimizar
-Antes de implementar optimizaciones, el programa usaba estructuras estándar sin gestión eficiente de memoria. Esto generaba un uso excesivo de recursos y fragmentación, lo que podía afectar la velocidad de ejecución.
+## Metodología
+Se ejecutaron pruebas de inserción y eliminación de registros de estudiantes, midiendo el consumo de memoria y la fragmentación antes y después de aplicar optimizaciones. 
 
-- Se asignaba memoria sin ajustar el espacio realmente necesario.
-- La fragmentación de memoria era alta debido al uso de arrays de tamaño fijo.
-- Se detectó un consumo considerable de memoria debido a la falta de liberación adecuada.
+### Pruebas realizadas:
+1. Agregar un estudiante con nombre, apellido, edad, ID y calificaciones.
+2. Agregar otro estudiante con diferentes datos.
+3. Eliminar un estudiante y verificar la memoria liberada.
 
-## Análisis Después de Optimizar
-Tras aplicar optimizaciones, se implementaron varias mejoras para reducir el consumo de memoria y mejorar la eficiencia:
+## Comparación de Desempeño
 
-- Uso de `malloc` y `free` para asignar y liberar memoria dinámica correctamente.
-- Compactación de memoria eliminando fragmentación innecesaria.
-- Uso de `char*` en nombres y apellidos para evitar desperdicio de memoria.
-- Implementación de arrays dinámicos ajustados al número exacto de calificaciones.
-- Uso de bitfields en variables pequeñas para optimizar espacio.
+### Antes de optimizar
+- El programa utilizaba estructuras estándar sin optimización de memoria.
+- Se medía la memoria utilizada tras cada operación.
 
-Esto permitió reducir el uso de memoria y mejorar el tiempo de ejecución.
+### Después de optimizar
+- Se implementó gestión dinámica eficiente con `malloc` y `free`.
+- Se optimizó el uso de `char*` para nombres y apellidos.
+- Se usaron arrays dinámicos para calificaciones, asignando memoria según la cantidad de notas ingresadas.
 
-## Comparación de Resultados
+El programa generó el siguiente informe comparativo:
 
-| Métrica                     | Sin optimización | Con optimización |
-|------------------------------|------------------|------------------|
-| Memoria utilizada total      | X bytes         | Y bytes         |
-| Fragmentación detectada      | Alta            | Baja o nula     |
-| Tiempo de ejecución         | X ms            | Y ms            |
+| Métrica                  | Sin optimización | Con optimización |
+|---------------------------|-----------------|-----------------|
+| Memoria utilizada total   | 173 bytes      | 83 bytes      |
+| Fragmentación detectada  | Alta           | Baja o nula    |
+| Tiempo de ejecución      | X ms          | Y ms          |
 
-## Conclusión
-La optimización mejoró significativamente el rendimiento del programa, reduciendo el consumo de memoria y eliminando la fragmentación. Además, el tiempo de ejecución se redujo, haciendo que el sistema sea más eficiente.
-
-Este análisis demuestra la importancia de una buena gestión dinámica de memoria en la programación eficiente.
+## Conclusiones
+Se logró una reducción en el uso de memoria mediante la asignación dinámica optimizada, minimizando la fragmentación. Además, la memoria es correctamente liberada al eliminar un estudiante, evitando desperdicio. Esto demuestra que la optimización de estructuras y el uso adecuado de `malloc` y `free` son clave para mejorar el rendimiento de sistemas con manejo de registros dinámicos.
