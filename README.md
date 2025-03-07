@@ -13,7 +13,7 @@ Como se mencionó previamente, el programa utiliza el algoritmo de **"Bubble Sor
 
 ## Código Fuente:
 
-```
+``` python
 def bubble_sort(lista):
     n = len(lista)
     for i in range(n):
@@ -30,12 +30,12 @@ estudiantes = [
     ('Maria',90)
 ]
 print(bubble_sort(estudiantes))
- ```
+ ``` 
 
 ## Entrada y Salida esperada
 ### Entrada:
 
- ```
+ ``` python
 estudiantes = [
     ("Ana", 85),
     ("Luis", 90),
@@ -48,7 +48,7 @@ estudiantes = [
 
 ## Salida: 
 
-```
+``` python
 [
     ("Sofía", 92),
     ("Luis", 90),
