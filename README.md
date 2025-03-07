@@ -1,4 +1,4 @@
-# Ordenamiento de Estudiantes con Bubble Sort
+# Enfoque 1: Ordenamiento de Estudiantes con Bubble Sort
 
 ### Descripción del Programa:
 
@@ -66,4 +66,79 @@ estudiantes = [
 3. Si el primer estudiante tiene menor calificación que el segundo, se intercambian
 4. Si tienen la misma calificación, se busca si existe alguna diferencia alfabéticamente para ordenarlos.
 5. Este proceso se repite hasta que la lista esté totalmente ordenada.
-   
+
+
+# Enfoque 2:  Ordenamiento Funcional de Estudiantes en Haskell
+
+## Descripción del Programa:
+
+Este programa hace uso del algoritmo de ordenamiento utilizando un enfoque **funcional** dentro del lenguaje de Haskell. Se ordena una lista de estudiantes siguiendo estos criterios:
+
+- Orden descendente según la calificación del estudiante
+- En caso de tener la misma calificación, los estudiantes se ordenan alfabéticamente por su nombre.
+
+*En este caso, el enfoque resulta ser distinto, dado a que se usa una* **abstracción declarativa** *donde se define lo que se desea lograr sin especificar el paso a paso*
+
+## Funcionamiento:
+
+Se utiliza la función ``SortBy`` que se obtiene de importar ``Data.List`` la cual permite definir un criterio de ordenamiento personalizado. De la misma forma, se aprovechan funciones como podrían serlo ``Conmparing`` al momento de importar ``Data.Ord``
+
+## Código Fuente:
+
+``` haskell
+
+import Data.List (sortBy) 
+import Data.Ord (comparing, Down(Down))
+
+type Estudiante = (String, Int)
+
+ordenarEstudiantes :: [Estudiante] -> [Estudiante]
+ordenarEstudiantes = sortBy (comparing (Down . snd) <> comparing fst)
+
+estudiantes :: [Estudiante]
+estudiantes = 
+    [("Ana", 85)
+    , ("Luis", 90)
+    , ("Carlos", 85)
+    , ("Sofia", 92)
+    , ("Maria", 90)
+    ]
+
+main :: IO ()
+main = print $ ordenarEstudiantes estudiantes
+
+```
+
+## Entrada y Salida Esperada: 
+
+### Entrada:
+
+``` haskell
+estudiantes =
+    [ ("Ana", 85)
+    , ("Luis", 90)
+    , ("Carlos", 85)
+    , ("Sofia", 92)
+    , ("Maria", 90)
+    ]
+```
+
+### Salida:
+
+``` haskell
+estudiantes =
+    [ ("Ana", 85)
+    , ("Luis", 90)
+    , ("Carlos", 85)
+    , ("Sofia", 92)
+    , ("Maria", 90)
+    ]
+```
+
+## Explicación del Algoritmo:
+
+1. ``SortBy`` Es la encargada del ordenamiento sin necesidad de agregar bucles explícitos.
+2. ``comparing (Down . snd)`` Es la encargada de ordenar las calificaciones en orden descendente.
+3. ``comparing fst`` Ordena alfabéticamente en caso de tener dos calificaciones identicas, como es el caso.
+4. El operador ``<>`` combina ambas condiciones del ordenamiento.
+
