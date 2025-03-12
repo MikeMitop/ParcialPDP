@@ -127,12 +127,12 @@ estudiantes =
 
 ``` haskell
 estudiantes =
-    [ ("Ana", 85)
-    , ("Luis", 90)
-    , ("Carlos", 85)
-    , ("Sofia", 92)
-    , ("Maria", 90)
-    ]
+    [("Sofía", 92),
+    ("Luis", 90),
+    ("María", 90),
+    ("Ana", 85),
+    ("Carlos", 85)
+]
 ```
 
 ## Explicación del Algoritmo:
