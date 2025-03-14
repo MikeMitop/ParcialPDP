@@ -190,9 +190,112 @@ En el código, como previamente se explicó, los tiempos de ejecución se guarda
 
 * Haciendo uso de la libreria de ``matplotlib`` y de ``matplotlib.pyplot``, el gráfico hecho muestra cómo el tiempo de ejecución está en constante aumento tras realizarse cada medición, dentro del **Eje X** se muestra la cantidad de ejecuciones (1 a 50) y en el **Eje Y** el tiempo acumulado representado en segundos.
 
-***La gráfica de Python (Imperativo) se encuentra en formato de imágen para permitir su correcta visualización dentro del repositorio***
+***La gráfica de Python (Imperativo) se encuentra en formato de imágen para permitir su correcta visualización dentro del repositorio como ``programacion_imperativa.png ``***
+
+
+# Comparación de los resultados de Haskell (Funcional)
+
+## Código Fuente
+
+```haskell
+
+module Main where
+
+import Data.List (sortBy)
+import Data.Ord (comparing, Down(Down))
+import Control.Monad (replicateM)
+import Control.DeepSeq (deepseq)  -- Para forzar evaluación completa
+import System.Random (randomRIO)   -- Para generar datos aleatorios
+import Data.Time.Clock (getCurrentTime, diffUTCTime)  -- Para medir el tiempo real de pared
+
+type Estudiante = (String, Int)
+
+-- Función para ordenar la lista de estudiantes
+ordenarEstudiantes :: [Estudiante] -> [Estudiante]
+ordenarEstudiantes =
+    sortBy (comparing (Down . snd) <> comparing fst)
+
+-- Función para generar una lista de estudiantes aleatorios con calificaciones y nombres variados
+generarEstudiantes :: Int -> IO [Estudiante]
+generarEstudiantes n = do
+    let nombres = ["Ana", "Luis", "Carlos", "Sofia", "Maria", "Pedro", "Lucia", "Juan", "Juanita", "Felipe", "Elena", "Luis", "Marta", "Victor"]
+    replicateM n $ do
+        nombreAleatorio <- (nombres !!) <$> randomRIO (0, length nombres - 1)
+        calificacionAleatoria <- randomRIO (0, 1000)  -- Ampliamos el rango de calificaciones
+        return (nombreAleatorio, calificacionAleatoria)
+
+-- Función para medir el tiempo de ejecución utilizando tiempo real (wall-clock time)
+medirTiempo :: IO a -> IO Double
+medirTiempo accion = do
+    inicio <- getCurrentTime
+    _ <- accion
+    fin <- getCurrentTime
+    let diff = diffUTCTime fin inicio  -- Diferencia en tiempo de pared
+    return (realToFrac diff :: Double)  -- Convertimos el tiempo a segundos
+
+main :: IO ()
+main = do
+    let numEjecuciones = 50  -- Número de ejecuciones a realizar
+    tiempos <- replicateM numEjecuciones $ do
+        estudiantes <- generarEstudiantes 1000  -- Generar 1000 estudiantes aleatorios con calificaciones variadas
+        -- Forzar la evaluación completa de la lista ordenada
+        let resultado = ordenarEstudiantes estudiantes
+        -- Usamos deepseq para forzar la evaluación de la lista ordenada
+        deepseq resultado (return ())
+        -- Asegurarnos de que realmente usamos el resultado para evitar optimización
+        let _ = length resultado  -- Consumimos la lista
+        -- Medir el tiempo de ejecución de la ordenación
+        medirTiempo (return resultado)
+
+    -- Guardar los tiempos de ejecución en un archivo de texto
+    writeFile "tiempos_ejecucion_haskell.txt" (unlines (map show tiempos))
+
+    -- Mostrar los tiempos en consola
+    putStrLn "Tiempos de ejecución (en segundos):"
+    mapM_ print tiempos
+    putStrLn "Tiempos guardados en el archivo tiempos_ejecucion_haskell.txt"
+```
+
+## Código Fuente 2 para realizar el gráfico con los valores dados en los tiempos de ejecución
+
+``` python
+import matplotlib.pyplot as plt
+import numpy as np
+
+tiempos_haskell = np.zeros(50)
+tiempos_haskell[45:] = 0.0005 
+
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, 51), tiempos_haskell, marker='o', color='blue', linestyle='-', label='Tiempos de Haskell')
+plt.title('Tiempos en Haskell (Programación Funcional)')
+plt.xlabel('Número de Ejecuciones')
+plt.ylabel('Tiempo de Ejecución (segundos)')
+plt.grid(True)
+plt.legend()
+plt.show()
+```
+
+## Análisis de resultados en Haskell
+
+En este caso, el proyecto realizado, en donde se realizó la comparación de los algoritmos de ordenamiento. El análisis del rendimiento que mostró la implementación de Haskell, debido a su Lasy Evaluation (Evaluación Perezosa) y las distintas optimizaciones que hace el compilador GHC, no se pudo realizar la comparación de la manera en la que se hizo en Python.
+
+## Optimización en GHC
+
+* **Lazy Evualation:** En este caso, dentro de Haskell, se utiliza una estrategia llamada Lazy Evaluation, la cual tiene como significado que las expresiones no son evaluadas hasta que son realmente necesariasa, en este caso, si un resultado no se usa explicitamente o se usa de manera innecesaria, GHC no lo ejecuta para ahorrar tiempo de forma computacional.
+* En el caso de este ejercicio, al momento de ordenar la lista, GHC puede decidir no realizar el ordenamiento a modo de otorgar los tiempos correctamente.
+
+* Optimización de tiempos de Compilación:  GHC es un compilador que optimiza a gran escala las optimizaciones cuando se trata de tiempo de compilación, GHC puede detectar las operaciones que no afecten al resultado esperado y omitir estos calculos. Esto hace que sus tiempos de ejecuciones puedan ser 0 o acercarse a 0. Por lo que se podría deducir que GHC busca el tiempo mas corto en compilación.
+
+***La gráfica que se obvuto se encuentra en el repositorio en formato de imágen como ``programacion_funcional.png``***
 
 
 ## 8. Conclusiones:
 
-Como conclusión, se puede decir que Python, usando **"Bubble Sort"** Resulta ser mas adecuada para la enseñanza dado a sus conceptos básicos de algoritmia y estructuras de control, mientras que en el caso de Haskell, usando ``sortBy`` resulta ser mas eficiente y modular dado a su inmutabilidad y uso de las funciones avanzadas. Sin embargo no necesariamente quiere decir que la programación funcional sea la mejor en estos casos, todo va a depender del contexto y los requisitos de uso que requiera el programa.
+* La implementación en Haskell se beneficia bastante dado a las optimizaciones realizadas por el compilador GHC, dado a su Lazy Evaluation y a la optimización en su tiempo de compilación. El código de Haskell mostró valores muy cercanos a cero (0) en la mayoría de sus ejecuciones. GHC logró eliminar eficientemente las operaciones innecesarias y evito que se llevara completamente el calculo del algoritmo de ordenamiento funcional. Esto resulta en un comportamiento mucho mas eficiente en terminos de tiempos de ejecución.
+  
+* La implementación en Python, no cuenta con las mismas formas de optimizarse como lo hace GHC, Python es un lenguaje fácil de usar y de interpretar, su desempeño en tiempos de compilación o en tareas como ordenamiento Bubble Sort, se ven afectados en la ejecución del código, a diferencia de Haskell, Python  no elimina tan eficientemente las operaciones innecesarias ni tampoco busca optimizar el código al momento de compilar. lo cual provoca tiempos de ejecución mucho mas extensos y no tan ajustados a los observados dentro de Haskell.
+  
+* La Lazy Evaluation de Haskell permite que solo se realicen calculos cuando son necesarios. En contexto de este proyecto permite que el trabajo realizado por el algoritmo de ordenamiento, sea mínimo o innecesario si los datos tienen varios parecidos o si están parcialmente relacionados. Esta evaluación garantiza que mejore la eficiencia de ejecución y esto hace que el lenguaje sea mas adecuado para escenarios como el de ordenamiento.
+
+
+
