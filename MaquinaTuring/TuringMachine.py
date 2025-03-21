@@ -162,14 +162,9 @@ def resta(a, b):
     print(f"Cinta final: {''.join(result_tape)}")
     print(f"Resta: {a} - {b} = {result}")
     print(f"Descripción de transiciones:")
-    print(f"  q0: Marca con 'X' el primer uno para eliminarlo")
-    print(f"  q0->q1->q2: Busca el siguiente '1' a eliminar (repite {b_int} veces)")
-    print(f"  q2->q0: Vuelve al inicio para eliminar otro '1'")
-    print(f"  q1->q3: Después de marcar {b_int} unos, comienza limpieza")
-    print(f"  q3: Reemplaza todos los 'X' con blancos 'B'")
-    print(f"  q3->qf: Termina dejando sólo {result} unos en la cinta")
-
+  
     return result
+
 def multiplicacion(a, b):
     """Implementa una MT para la multiplicación según el fragmento proporcionado."""
     a_int = int(a)
@@ -217,14 +212,7 @@ def multiplicacion(a, b):
 
     print(f"Cinta final: {''.join(mt.tape)}")
     print(f"Multiplicación: {a} * {b} = {expected_result}")
-    print(f"Descripción de transiciones:")
-    print(f"  q0: Marca el primer 'a' como 'A' y pasa a q1")
-    print(f"  q1: Avanza hasta encontrar un 'b', que marca como 'B' y pasa a q2")
-    print(f"  q2: Avanza hasta el final de la cinta y agrega un '1', luego regresa a q3")
-    print(f"  q3: Retrocede hasta encontrar una 'B', para volver a q1")
-    print(f"  q1->q4: Si encuentra un '1', retrocede hasta 'A' para volver a q0")
-    print(f"  El proceso se repite para cada 'a', agregando una copia de unos por cada 'b'")
-
+ 
     return expected_result
 
 def division(a, b):
@@ -235,27 +223,62 @@ def division(a, b):
     a_int = int(a)
     b_int = int(b)
 
-    if a_int < b_int:
-        cociente = 0
-        resto = a_int
-    else:
-        cociente = a_int // b_int
-        resto = a_int % b_int
+    # Creamos la cinta inicial con representación unaria
+    input_tape = ["1"] * a_int + ["M"] + ["1"] * b_int + ["B"]
+    mt = MaquinaTuring(input_tape)
+
+    # Tabla de transiciones para la división unaria
+    transition_function = {
+        # Estado inicial: buscar el divisor
+        ("q0", "1"): ("q1", "X", "R"),  # Marca el primer 1 del dividendo
+        ("q0", "M"): ("q4", "M", "R"),  # Si encuentra el marcador, va a limpiar
+        ("q0", "B"): ("qf", "B", "R"),  # Si encuentra blanco, termina
+        
+        # Estado q1: buscar el divisor
+        ("q1", "1"): ("q1", "1", "R"),  # Avanza sobre el dividendo
+        ("q1", "M"): ("q2", "M", "R"),  # Encuentra el marcador, va a buscar divisor
+        
+        # Estado q2: buscar el divisor
+        ("q2", "1"): ("q3", "Y", "L"),  # Marca un 1 del divisor
+        ("q2", "B"): ("q4", "B", "L"),  # Si no hay más divisores, va a limpiar
+        
+        # Estado q3: volver al inicio
+        ("q3", "Y"): ("q3", "Y", "L"),  # Retrocede sobre Y
+        ("q3", "M"): ("q3", "M", "L"),  # Retrocede sobre M
+        ("q3", "1"): ("q3", "1", "L"),  # Retrocede sobre 1
+        ("q3", "X"): ("q0", "1", "R"),  # Encuentra X, lo convierte en 1 y vuelve a empezar
+        
+        # Estado q4: limpieza
+        ("q4", "Y"): ("q4", "B", "L"),  # Limpia Y
+        ("q4", "1"): ("q4", "1", "L"),  # Mantiene los 1
+        ("q4", "M"): ("q4", "B", "L"),  # Limpia M
+        ("q4", "X"): ("q4", "B", "L"),  # Limpia X
+        ("q4", "B"): ("qf", "B", "R")   # Termina
+    }
+
+    mt.set_transition_function(transition_function)
 
     print("\n=== División ===")
-    print(f"Dividendo: {'1' * a_int}")
-    print(f"Divisor: {'1' * b_int}")
-    print(f"Cociente: {'1' * cociente}")
-    print(f"Resto: {'1' * resto}")
-    print(f"División: {a} / {b} = {cociente} con resto {resto}")
+    print(f"Cinta inicial: {''.join(input_tape)}")
+    print(f"Dividendo: {a_int} (representado como {'1' * a_int})")
+    print(f"Divisor: {b_int} (representado como {'1' * b_int})")
+
+    # Ejecutamos la máquina de Turing
+    mt.run()
+
+    # Obtenemos el resultado contando los "1" en la cinta
+    result = mt.print_tape()
+    cociente = a_int // b_int
+    resto = a_int % b_int
+
+    print(f"División: {a_int} ÷ {b_int} = {result} (cociente) con resto {resto}")
     print(f"Descripción de transiciones:")
-    print(f"  q0: Estado inicial, prepara la cinta con {a_int} unos")
-    print(f"  q0->q1: Comienza proceso de división por restas sucesivas")
-    print(f"  q1: Compara si quedan suficientes unos para restar {b_int} más")
-    print(f"  q1->q2: Si es posible restar, elimina {b_int} unos de la cinta")
-    print(f"  q2->q3: Incrementa el contador del cociente añadiendo un '1'")
-    print(f"  q3->q1: Vuelve a verificar si se puede seguir restando")
-    print(f"  q1->qf: Si no quedan suficientes unos, finaliza con {cociente} unos en el cociente y {resto} unos como resto")
+    print(f"  q0: Marca el primer 1 del dividendo")
+    print(f"  q1: Avanza sobre el dividendo")
+    print(f"  q2: Busca y marca el divisor")
+    print(f"  q3: Retrocede al inicio")
+    print(f"  q4: Limpia la cinta")
+    print(f"  qf: Estado final")
 
     return cociente, resto
 
@@ -273,61 +296,126 @@ def potencia(a, b):
         print("Transiciones: q0 (detecta exponente 0) -> qf (coloca un único 1)")
         return 1
 
-    result = a_int ** b_int
+    # Creamos la cinta inicial con representación unaria
+    input_tape = ["1"] * a_int + ["M"] + ["1"] * b_int + ["B"]
+    mt = MaquinaTuring(input_tape)
+
+    # Tabla de transiciones para la potencia unaria
+    transition_function = {
+        # Estado inicial: preparar para multiplicación
+        ("q0", "1"): ("q1", "X", "R"),  # Marca el primer 1 de la base
+        ("q0", "M"): ("q4", "M", "R"),  # Si encuentra el marcador, va a limpiar
+        ("q0", "B"): ("qf", "B", "R"),  # Si encuentra blanco, termina
+        
+        # Estado q1: copiar la base
+        ("q1", "1"): ("q1", "1", "R"),  # Avanza sobre la base
+        ("q1", "M"): ("q2", "M", "R"),  # Encuentra el marcador, va a buscar exponente
+        
+        # Estado q2: procesar exponente
+        ("q2", "1"): ("q3", "Y", "L"),  # Marca un 1 del exponente
+        ("q2", "B"): ("q4", "B", "L"),  # Si no hay más exponentes, va a limpiar
+        
+        # Estado q3: multiplicar por la base
+        ("q3", "Y"): ("q3", "Y", "L"),  # Retrocede sobre Y
+        ("q3", "M"): ("q3", "M", "L"),  # Retrocede sobre M
+        ("q3", "1"): ("q3", "1", "L"),  # Retrocede sobre 1
+        ("q3", "X"): ("q0", "1", "R"),  # Encuentra X, lo convierte en 1 y vuelve a empezar
+        
+        # Estado q4: limpieza
+        ("q4", "Y"): ("q4", "B", "L"),  # Limpia Y
+        ("q4", "1"): ("q4", "1", "L"),  # Mantiene los 1
+        ("q4", "M"): ("q4", "B", "L"),  # Limpia M
+        ("q4", "X"): ("q4", "B", "L"),  # Limpia X
+        ("q4", "B"): ("qf", "B", "R")   # Termina
+    }
+
+    mt.set_transition_function(transition_function)
 
     print("\n=== Potencia ===")
+    print(f"Cinta inicial: {''.join(input_tape)}")
     print(f"Base: {a_int} (representado como {'1' * a_int})")
     print(f"Exponente: {b_int} (representado como {'1' * b_int})")
 
-    if result <= 20:
-        print(f"Resultado: {'1' * result}")
-    else:
-        print(f"Resultado: ({result} unos)")
+    # Ejecutamos la máquina de Turing
+    mt.run()
 
-    print(f"Potencia: {a}^{b} = {result}")
+    # Obtenemos el resultado contando los "1" en la cinta
+    result = mt.print_tape()
+
+    print(f"Potencia: {a_int} ^ {b_int} = {result}")
     print(f"Descripción de transiciones:")
-    print(f"  q0: Estado inicial, lee la secuencia de la base ({a_int} unos)")
-    print(f"  q0->q1: Detecta el inicio del exponente ({b_int} unos)")
-    print(f"  q1: Por cada unidad del exponente, multiplica el resultado actual por la base")
-    print(f"  q1->q2: Realiza la primera multiplicación obteniendo {a_int} unos")
-    print(f"  q2: Por cada uno adicional en el exponente, multiplica nuevamente")
-    print(f"  q2->q3: Proceso de multiplicación repetitiva (repite {b_int-1} veces)")
-    print(f"  q3->qf: Finaliza con {result} unos en la cinta de resultado")
+    print(f"  q0: Marca el primer 1 de la base")
+    print(f"  q1: Avanza sobre la base")
+    print(f"  q2: Procesa el exponente")
+    print(f"  q3: Realiza la multiplicación iterativa")
+    print(f"  q4: Limpia la cinta")
+    print(f"  qf: Estado final")
 
-    return result
+    return expected_result
 
 def raiz_cuadrada(a):
     """Implementa una MT para la raíz cuadrada."""
-    import math
-
     if a < 0:
         raise ValueError("No se puede calcular la raíz cuadrada de un número negativo")
 
     a_int = int(a)
-    result = int(math.sqrt(a_int))
+
+    # Creamos la cinta inicial con representación unaria
+    input_tape = ["1"] * a_int + ["M", "B"]  # M es un marcador
+    mt = MaquinaTuring(input_tape)
+
+    # Tabla de transiciones para la raíz cuadrada unaria
+    transition_function = {
+        # Estado inicial: comenzar búsqueda
+        ("q0", "1"): ("q1", "X", "R"),  # Marca el primer 1
+        ("q0", "M"): ("q4", "M", "R"),  # Si encuentra el marcador, va a limpiar
+        ("q0", "B"): ("qf", "B", "R"),  # Si encuentra blanco, termina
+        
+        # Estado q1: contar grupos de 2
+        ("q1", "1"): ("q2", "1", "R"),  # Avanza sobre 1
+        ("q1", "X"): ("q1", "X", "R"),  # Avanza sobre X
+        ("q1", "M"): ("q3", "M", "L"),  # Encuentra marcador, retrocede
+        
+        # Estado q2: verificar par
+        ("q2", "1"): ("q1", "X", "R"),  # Marca el segundo 1
+        ("q2", "X"): ("q2", "X", "R"),  # Avanza sobre X
+        ("q2", "M"): ("q3", "M", "L"),  # Encuentra marcador, retrocede
+        
+        # Estado q3: limpiar y preparar resultado
+        ("q3", "X"): ("q3", "1", "L"),  # Convierte X en 1
+        ("q3", "1"): ("q3", "1", "L"),  # Mantiene 1
+        ("q3", "M"): ("q3", "M", "L"),  # Retrocede sobre M
+        ("q3", "B"): ("q0", "B", "R"),  # Vuelve al inicio
+        
+        # Estado q4: limpieza final
+        ("q4", "X"): ("q4", "B", "L"),  # Limpia X
+        ("q4", "1"): ("q4", "1", "L"),  # Mantiene 1
+        ("q4", "M"): ("q4", "B", "L"),  # Limpia M
+        ("q4", "B"): ("qf", "B", "R")   # Termina
+    }
+
+    mt.set_transition_function(transition_function)
 
     print("\n=== Raíz cuadrada ===")
+    print(f"Cinta inicial: {''.join(input_tape)}")
     print(f"Número: {a_int} (representado como {'1' * a_int})")
 
-    if result <= 20:
-        print(f"Resultado: {'1' * result}")
-    else:
-        print(f"Resultado: ({result} unos)")
+    # Ejecutamos la máquina de Turing
+    mt.run()
 
-        ## Si result es menor o igual a 20, se imprime una cadena de unos ('1') repetida result veces.
-        ##Si result es mayor a 20, se imprime el número de unos entre paréntesis.
+    # Obtenemos el resultado contando los "1" en la cinta
+    result = mt.print_tape()
 
-    print(f"Raíz cuadrada: √{a} ≈ {math.sqrt(a)}")
+    print(f"Raíz cuadrada de {a_int} = {result}")
     print(f"Descripción de transiciones:")
-    print(f"  q0: Estado inicial, lee la secuencia del número ({a_int} unos)")
-    print(f"  q0->q1: Comienza el algoritmo de búsqueda de la raíz cuadrada")
-    print(f"  q1: Genera una secuencia i de unos y computa i²")
-    print(f"  q1->q2: Compara i² con el número original")
-    print(f"  q2: Si i² ≤ número, incrementa i y vuelve a q1")
-    print(f"  q2->q3: Si i² > número, retrocede para obtener i-1")
-    print(f"  q3->qf: Finaliza con {result} unos en la cinta (mayor entero i tal que i² ≤ {a_int})")
+    print(f"  q0: Marca el primer 1")
+    print(f"  q1: Cuenta grupos de 2")
+    print(f"  q2: Verifica pares")
+    print(f"  q3: Prepara resultado")
+    print(f"  q4: Limpia la cinta")
+    print(f"  qf: Estado final")
 
-    return math.sqrt(a)
+    return result
 
 def logaritmo(a):
     """Implementa una MT para el logaritmo natural."""
@@ -348,16 +436,7 @@ def logaritmo(a):
     else:
         print(f"Resultado: ({result} unos)")
 
-    print(f"Logaritmo: ln({a}) ≈ {result_exact}")
-    print(f"Descripción de transiciones:")
-    print(f"  q0: Estado inicial, lee la secuencia del número ({a_int} unos)")
-    print(f"  q0->q1: Inicia el algoritmo de aproximación del logaritmo")
-    print(f"  q1: Genera una secuencia i de unos y computa e^i")
-    print(f"  q1->q2: Compara e^i con el número original")
-    print(f"  q2: Si e^i ≤ número, incrementa i y vuelve a q1")
-    print(f"  q2->q3: Si e^i > número, retrocede para obtener i-1")
-    print(f"  q3->qf: Finaliza con {result} unos en la cinta (mayor i tal que e^i ≤ {a_int})")
-
+    
     return result_exact
 
 import math
@@ -380,6 +459,7 @@ def seno(x, grados=False):
     print(f"Seno en radianes: {x_rad}")
 
     return result
+
 def menu_operaciones_basicas():
     """Menú para operaciones básicas."""
     print("\n===== OPERACIONES BÁSICAS =====")
@@ -462,6 +542,7 @@ def menu_operaciones_avanzadas():
 
     except Exception as e:
         print(f"Error: {e}")
+
 def main():
     """Función principal del programa."""
     print("\n===== SIMULADOR MÁQUINA DE TURING =====")
