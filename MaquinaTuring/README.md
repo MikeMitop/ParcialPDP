@@ -46,7 +46,7 @@ Se basa en restas sucesivas. Calcula el cociente y el resto simulando un proceso
 
 ## Operaciones Avanzadas
 
-> Aunque algunas se apoyan en librerías matemáticas, se documenta su lógica como si fueran procesos de una M.T. con múltiples fases de transición.
+> Aunque algunas se apoyan en librerías matemáticas, La gran mayoria se usa mediante transisiones.
 
 ### `potencia(a, b)`
 Simula la potenciación como multiplicaciones repetidas.
@@ -68,20 +68,6 @@ Calcula el seno de un ángulo (en radianes o grados), apoyado en `math.sin()` pe
 - `menu_operaciones_avanzadas()`: Ejecuta potencia, raíz, logaritmo o seno.
 - `main()`: Muestra el menú principal y permite seleccionar entre operaciones básicas o avanzadas.
 
----
-
-## Cómo Ejecutar
-
-```bash
-python simulador_mt.py
-```
-
----
-
-## Requisitos
-
-- Python 3.x
-- Bibliotecas estándar: `math`
 
 ---
 
